@@ -49,7 +49,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.12
       Code:
-        S3Bucket: studetbucket
+        S3Bucket: studentdemobucket
         S3Key: index.zip
       Timeout: 10
 
@@ -65,13 +65,49 @@ Resources:
       PathPart: students
       RestApiId: !Ref ApiGateway
 
-  ApiMethod:
+  MyGetMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      HttpMethod: ANY
+      AuthorizationType: NONE
+      HttpMethod: GET
       ResourceId: !Ref ApiResource
       RestApiId: !Ref ApiGateway
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+
+  MyPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
       AuthorizationType: NONE
+      HttpMethod: POST
+      ResourceId: !Ref ApiResource
+      RestApiId: !Ref ApiGateway
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+
+  MyDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: DELETE
+      ResourceId: !Ref ApiResource
+      RestApiId: !Ref ApiGateway
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+
+  MyPatchMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: PATCH
+      ResourceId: !Ref ApiResource
+      RestApiId: !Ref ApiGateway
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
@@ -79,7 +115,11 @@ Resources:
 
   ApiDeployment:
     Type: AWS::ApiGateway::Deployment
-    DependsOn: ApiMethod
+    DependsOn: 
+      - MyGetMethod
+      - MyPostMethod
+      - MyDeleteMethod
+      - MyPatchMethod
     Properties:
       RestApiId: !Ref ApiGateway
       StageName: prod
@@ -90,7 +130,7 @@ Resources:
       FunctionName: !GetAtt LambdaFunction.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:aws:execute-api:ap-south-1:194026924171:${ApiGateway}/*/ANY/students
+      SourceArn: !Sub arn:aws:execute-api:ap-south-1:194026924171:${ApiGateway}/*/*/students
 
 Outputs:
   ApiUrl:
