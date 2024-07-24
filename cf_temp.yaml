@@ -41,16 +41,52 @@ Resources:
                   - dynamodb:DeleteItem
                 Resource: !GetAtt StudentTable.Arn
 
-  LambdaFunction:
+  CreateStudentFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: StudentAPI
-      Handler: index.lambda_handler
+      FunctionName: CreateStudentAPI
+      Handler: logic.create_student
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.12
       Code:
         S3Bucket: studentdemobucket
-        S3Key: index.zip
+        S3Key: logic.zip
+      Timeout: 10
+
+  ReadStudentFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ReadStudentAPI
+      Handler: logic.get_student
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.12
+      Code:
+        S3Bucket: studentdemobucket
+        S3Key: logic.zip
+      Timeout: 10
+
+  UpdateStudentFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: UpdateStudentAPI
+      Handler: logic.update_student
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.12
+      Code:
+        S3Bucket: studentdemobucket
+        S3Key: logic.zip
+      Timeout: 10
+
+  DeleteStudentFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: DeleteStudentAPI
+      Handler: logic.delete_student
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.12
+      Code:
+        S3Bucket: studentdemobucket
+        S3Key: logic.zip
       Timeout: 10
 
   ApiGateway:
@@ -75,7 +111,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${ReadStudentFunction.Arn}/invocations
 
   MyPostMethod:
     Type: AWS::ApiGateway::Method
@@ -87,8 +123,8 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
-
+        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${CreateStudentFunction.Arn}/invocations
+       
   MyDeleteMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -99,8 +135,8 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
-
+        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${DeleteStudentFunction.Arn}/invocations
+        
   MyPatchMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -111,8 +147,8 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
-
+        Uri: !Sub arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/${UpdateStudentFunction.Arn}/invocations
+        
   ApiDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn: 
@@ -124,10 +160,34 @@ Resources:
       RestApiId: !Ref ApiGateway
       StageName: prod
 
-  LambdaApiGatewayInvoke:
+  CreateLambdaApiGatewayInvoke:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !GetAtt LambdaFunction.Arn
+      FunctionName: !Ref CreateStudentFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:ap-south-1:194026924171:${ApiGateway}/*/*/students
+
+  ReadLambdaApiGatewayInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ReadStudentFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:ap-south-1:194026924171:${ApiGateway}/*/*/students
+
+  UpdateLambdaApiGatewayInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref UpdateStudentFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:ap-south-1:194026924171:${ApiGateway}/*/*/students
+
+  DeleteLambdaApiGatewayInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref DeleteStudentFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:ap-south-1:194026924171:${ApiGateway}/*/*/students
