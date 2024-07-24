@@ -5,24 +5,7 @@ from boto3.dynamodb.conditions import Key
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('Students')
 
-def lambda_handler(event, context):
-    http_method = event['httpMethod']
-    
-    if http_method == 'POST':
-        return create_student(event)
-    elif http_method == 'GET':
-        return get_student(event)
-    elif http_method == 'PATCH':
-        return update_student(event)
-    elif http_method == 'DELETE':
-        return delete_student(event)
-    else:
-        return {
-            'statusCode': 400,
-            'body': json.dumps('Unsupported HTTP method')
-        }
-
-def create_student(event):
+def create_student(event, context):
     try:
         body = json.loads(event['body'])
         student_id = body['StudentID']
@@ -47,7 +30,7 @@ def create_student(event):
             'body': json.dumps(f'Error: {str(e)}')
         }
 
-def get_student(event):
+def get_student(event, context):
     try:
         student_id = event['queryStringParameters']['StudentID']
         
@@ -73,7 +56,7 @@ def get_student(event):
             'body': json.dumps(f'Error: {str(e)}')
         }
 
-def update_student(event):
+def update_student(event, context):
     try:
         body = json.loads(event['body'])
         student_id = body['StudentID']
@@ -108,7 +91,7 @@ def update_student(event):
             'body': json.dumps(f'Error: {str(e)}')
         }
 
-def delete_student(event):
+def delete_student(event, context):
     try:
         student_id = event['queryStringParameters']['StudentID']
         
