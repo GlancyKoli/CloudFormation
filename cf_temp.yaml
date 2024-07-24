@@ -45,48 +45,48 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: CreateStudentAPI
-      Handler: logic.create_student
+      Handler: index.create_student
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.12
       Code:
         S3Bucket: studentdemobucket
-        S3Key: logic.zip
+        S3Key: index.zip
       Timeout: 10
 
   ReadStudentFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: ReadStudentAPI
-      Handler: logic.get_student
+      Handler: index.get_student
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.12
       Code:
         S3Bucket: studentdemobucket
-        S3Key: logic.zip
+        S3Key: index.zip
       Timeout: 10
 
   UpdateStudentFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: UpdateStudentAPI
-      Handler: logic.update_student
+      Handler: index.update_student
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.12
       Code:
         S3Bucket: studentdemobucket
-        S3Key: logic.zip
+        S3Key: index.zip
       Timeout: 10
 
   DeleteStudentFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: DeleteStudentAPI
-      Handler: logic.delete_student
+      Handler: index.delete_student
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.12
       Code:
         S3Bucket: studentdemobucket
-        S3Key: logic.zip
+        S3Key: index.zip
       Timeout: 10
 
   ApiGateway:
